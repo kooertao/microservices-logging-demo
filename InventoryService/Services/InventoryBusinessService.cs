@@ -21,7 +21,7 @@ public class InventoryBusinessService : IInventoryBusinessService
     {
         _logger = logger;
 
-        // ???????????
+        // mock data
         _inventory.AddRange(new[]
         {
             new InventoryItem
