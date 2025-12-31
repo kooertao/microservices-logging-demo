@@ -1,5 +1,5 @@
-# Microservices Logging Demo - Deployment Script
-# PowerShell Version
+# Microservices Logging Demo - Main Deployment Script
+# Deploys infrastructure and all microservices
 
 Write-Host "?? Starting deployment of Microservices Logging Demo..." -ForegroundColor Cyan
 Write-Host ""
@@ -86,21 +86,17 @@ Write-Host "  URL: http://localhost:9200"
 Write-Host "  Command: kubectl port-forward -n logging svc/elasticsearch 9200:9200"
 Write-Host ""
 
-Write-Host "Useful commands:" -ForegroundColor Green
-Write-Host "  # View logs"
-Write-Host "  kubectl logs -n microservices -l app=order-service -f"
-Write-Host "  kubectl logs -n microservices -l app=inventory-service -f"
-Write-Host "  kubectl logs -n logging -l app=fluent-bit -f"
-Write-Host ""
-Write-Host "  # View pods"
-Write-Host "  kubectl get pods -n microservices"
-Write-Host "  kubectl get pods -n logging"
-Write-Host ""
-Write-Host "  # Query Elasticsearch"
-Write-Host "  curl http://localhost:9200/_cat/indices?v"
-Write-Host ""
-
 Write-Host "? Deployment completed successfully!" -ForegroundColor Green
+Write-Host ""
+Write-Host "?? Useful commands:" -ForegroundColor Cyan
+Write-Host "  View logs:  kubectl logs -n microservices -l app=order-service -f"
+Write-Host "  View pods:  kubectl get pods -n microservices"
+Write-Host "  Query ES:   curl http://localhost:9200/_cat/indices?v"
+Write-Host ""
+Write-Host "?? Advanced features:" -ForegroundColor Cyan
+Write-Host "  Archive ES data:  .\scripts\utils\archive-es-data.ps1"
+Write-Host "  Manage archives:  .\scripts\utils\manage-es-archives.ps1"
+Write-Host "  Interactive demo: .\scripts\utils\archive-demo.ps1"
 Write-Host ""
 Write-Host "Next steps:"
 Write-Host "  1. Run: kubectl port-forward -n logging svc/kibana 5601:5601"

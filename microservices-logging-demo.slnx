@@ -1,12 +1,15 @@
 <Solution>
-  <Folder Name="/k8s-infra/">
+  <Folder Name="/k8s-infrastructure/">
     <File Path="k8s-infrastructure/00-namespace.yaml" />
     <File Path="k8s-infrastructure/01-elasticsearch.yaml" />
     <File Path="k8s-infrastructure/02-kibana.yaml" />
     <File Path="k8s-infrastructure/03-fluent-bit-rbac.yaml" />
     <File Path="k8s-infrastructure/04-fluent-bit-configmap.yaml" />
     <File Path="k8s-infrastructure/05-fluent-bit-daemonset.yaml" />
-    <File Path="k8s-infrastructure/README.md" />
+  </Folder>
+  <Folder Name="/scripts/">
+    <File Path="scripts/cleanup.ps1" />
+    <File Path="scripts/deploy.ps1" />
   </Folder>
   <Project Path="InventoryService/InventoryService.csproj" />
   <Project Path="OrderService/OrderService.csproj" />
