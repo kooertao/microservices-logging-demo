@@ -1,4 +1,4 @@
-﻿# Microservices Logging Demo - 清理脚本
+﻿# Microservices Logging Demo - Clean scripts
 # PowerShell 版本
 # 注意：此脚本会保留 Elasticsearch 数据（日志不会丢失）
 
