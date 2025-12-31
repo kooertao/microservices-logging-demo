@@ -8,6 +8,10 @@ FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 
+# Add JCI root cert
+COPY ["OrderService/GO JCI Root CA 1.crt", "/usr/local/share/ca-certificates/"]
+RUN update-ca-certificates
+
 COPY ["InventoryService/InventoryService.csproj", "InventoryService/"]
 RUN dotnet restore "./InventoryService/InventoryService.csproj"
 COPY . .
