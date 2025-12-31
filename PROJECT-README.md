@@ -1,0 +1,246 @@
+# Microservices Logging Demo
+
+A demonstration of centralized logging for microservices using Elasticsearch, Fluent Bit, and Kibana (EFK stack) on Kubernetes.
+
+## Architecture
+
+```
+???????????????????????????????????????????????????????????????
+?                    Kubernetes Cluster                        ?
+?                                                              ?
+?  ????????????????????????????????????????????????????       ?
+?  ?          Microservices Namespace                 ?       ?
+?  ?                                                  ?       ?
+?  ?  ????????????????       ????????????????       ?       ?
+?  ?  ?    Order     ?????????  Inventory   ?       ?       ?
+?  ?  ?   Service    ?       ?   Service    ?       ?       ?
+?  ?  ????????????????       ????????????????       ?       ?
+?  ?         ?                       ?               ?       ?
+?  ???????????????????????????????????????????????????       ?
+?            ?                       ?                        ?
+?            ?         Logs          ?                        ?
+?            ?                       ?                        ?
+?  ????????????????????????????????????????????????????       ?
+?  ?            Logging Namespace                     ?       ?
+?  ?                                                  ?       ?
+?  ?  ????????????????                               ?       ?
+?  ?  ?  Fluent Bit  ? (DaemonSet - collects logs)  ?       ?
+?  ?  ????????????????                               ?       ?
+?  ?         ?                                        ?       ?
+?  ?         ?                                        ?       ?
+?  ?  ????????????????       ????????????????       ?       ?
+?  ?  ?Elasticsearch ?????????    Kibana    ?       ?       ?
+?  ?  ?  (Storage)   ?       ? (Visualization)      ?       ?
+?  ?  ????????????????       ????????????????       ?       ?
+?  ????????????????????????????????????????????????????       ?
+???????????????????????????????????????????????????????????????
+```
+
+## Project Structure
+
+```
+microservices-logging-demo/
+??? k8s-infrastructure/          # Shared infrastructure components
+?   ??? 00-namespace.yaml        # Namespaces (logging, microservices)
+?   ??? 01-elasticsearch.yaml    # Elasticsearch StatefulSet & Service
+?   ??? 02-kibana.yaml           # Kibana Deployment & Service
+?   ??? 03-fluent-bit-rbac.yaml  # Fluent Bit RBAC configuration
+?   ??? 04-fluent-bit-configmap.yaml  # Fluent Bit configuration
+?   ??? 05-fluent-bit-daemonset.yaml  # Fluent Bit DaemonSet
+?   ??? README.md                # Infrastructure documentation
+?
+??? OrderService/                # Order microservice
+?   ??? k8s/
+?   ?   ??? 06-order-service.yaml
+?   ??? Controllers/
+?   ??? Services/
+?   ??? Dockerfile
+?
+??? InventoryService/            # Inventory microservice
+?   ??? k8s/
+?   ?   ??? 07-inventory-service.yaml
+?   ??? Controllers/
+?   ??? Dockerfile
+?
+??? scripts/                     # Deployment scripts
+    ??? deploy-all.ps1           # Deploy everything
+    ??? deploy-infrastructure.ps1 # Deploy only infrastructure
+    ??? cleanup-infrastructure.ps1 # Remove infrastructure
+    ??? cleanup-all.ps1          # Remove everything
+```
+
+## Prerequisites
+
+- Docker Desktop with Kubernetes enabled
+- kubectl configured
+- PowerShell (for deployment scripts)
+
+## Quick Start
+
+### 1. Deploy Infrastructure Only
+
+If you want to deploy just the logging infrastructure (Elasticsearch, Kibana, Fluent Bit):
+
+```powershell
+.\scripts\deploy-infrastructure.ps1
+```
+
+### 2. Deploy Everything
+
+To deploy both infrastructure and microservices:
+
+```powershell
+.\scripts\deploy-all.ps1
+```
+
+### 3. Manual Deployment
+
+You can also deploy components manually:
+
+```bash
+# Deploy infrastructure
+kubectl apply -f k8s-infrastructure/
+
+# Build and deploy Order Service
+docker build -t order-service:latest -f OrderService/Dockerfile .
+kubectl apply -f OrderService/k8s/
+
+# Build and deploy Inventory Service
+docker build -t inventory-service:latest -f InventoryService/Dockerfile .
+kubectl apply -f InventoryService/k8s/
+```
+
+## Accessing the Services
+
+### Kibana (Log Visualization)
+
+```bash
+kubectl port-forward -n logging svc/kibana 5601:5601
+```
+
+Then open http://localhost:5601
+
+### Order Service
+
+```bash
+kubectl port-forward -n microservices svc/order-service 8080:80
+```
+
+Then open http://localhost:8080/swagger
+
+### Inventory Service
+
+```bash
+kubectl port-forward -n microservices svc/inventory-service 8081:80
+```
+
+Then open http://localhost:8081
+
+### Elasticsearch
+
+```bash
+kubectl port-forward -n logging svc/elasticsearch 9200:9200
+```
+
+Then open http://localhost:9200
+
+## Features
+
+- **Centralized Logging**: All microservice logs are collected in Elasticsearch
+- **Structured Logging**: JSON-formatted logs with correlation IDs
+- **Kubernetes Metadata**: Logs enriched with pod, namespace, and node information
+- **Distributed Tracing**: Correlation IDs track requests across services
+- **Visual Analysis**: Kibana dashboards for log exploration
+
+## Log Correlation
+
+The services use correlation IDs to track requests across the microservices:
+
+1. Order Service receives a request and generates a correlation ID
+2. When calling Inventory Service, the correlation ID is passed via HTTP header
+3. Both services log with the same correlation ID
+4. In Kibana, you can search for the correlation ID to see the entire request flow
+
+Example Kibana query:
+```
+CorrelationId: "abc123-def456-ghi789"
+```
+
+## Cleanup
+
+### Remove Everything
+
+```powershell
+.\scripts\cleanup-all.ps1
+```
+
+### Remove Only Infrastructure
+
+```powershell
+.\scripts\cleanup-infrastructure.ps1
+```
+
+### Remove Namespaces
+
+```bash
+kubectl delete namespace logging microservices
+```
+
+## Useful Commands
+
+```bash
+# View logs
+kubectl logs -n microservices -l app=order-service -f
+kubectl logs -n microservices -l app=inventory-service -f
+kubectl logs -n logging -l app=fluent-bit -f
+
+# View pods
+kubectl get pods -n microservices
+kubectl get pods -n logging
+
+# Check Elasticsearch indices
+curl http://localhost:9200/_cat/indices?v
+
+# Check service endpoints
+kubectl get svc -n microservices
+kubectl get svc -n logging
+```
+
+## Troubleshooting
+
+### Elasticsearch not starting
+
+Check if it has enough resources:
+```bash
+kubectl describe pod -n logging -l app=elasticsearch
+```
+
+### Fluent Bit not collecting logs
+
+Check the DaemonSet status:
+```bash
+kubectl get pods -n logging -l app=fluent-bit
+kubectl logs -n logging -l app=fluent-bit
+```
+
+### Services not accessible
+
+Verify the services are running:
+```bash
+kubectl get pods -n microservices
+kubectl describe pod -n microservices <pod-name>
+```
+
+## Technologies Used
+
+- **Kubernetes**: Container orchestration
+- **Docker**: Containerization
+- **Elasticsearch 8.11.0**: Log storage and search
+- **Kibana 8.11.0**: Log visualization
+- **Fluent Bit 2.2**: Log collection and forwarding
+- **.NET 10**: Microservices framework
+- **Serilog**: Structured logging library
+
+## License
+
+MIT

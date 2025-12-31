@@ -14,14 +14,14 @@ public class CorrelationIdMiddleware
 
     public async Task InvokeAsync(HttpContext context)
     {
-        // ????? Correlation ID
+        // Retrieve Correlation ID
         var correlationId = context.Request.Headers[CorrelationIdHeader].FirstOrDefault()
             ?? Guid.NewGuid().ToString();
 
-        // ??????
+        // Add Correlation ID to Response Headers
         context.Response.Headers.TryAdd(CorrelationIdHeader, correlationId);
 
-        // ????????
+        // Create a logging scope
         using (_logger.BeginScope(new Dictionary<string, object>
         {
             ["CorrelationId"] = correlationId,
