@@ -164,8 +164,6 @@ public class InventoryBusinessService : IInventoryBusinessService
                 Message = "Insufficient inventory"
             };
         }
-
-        // ????
         item.AvailableQuantity -= request.Quantity;
         item.ReservedQuantity += request.Quantity;
         item.LastUpdated = DateTime.UtcNow;
@@ -180,8 +178,6 @@ public class InventoryBusinessService : IInventoryBusinessService
             request.Quantity,
             item.AvailableQuantity
         );
-
-        // ??????
         Thread.Sleep(_random.Next(20, 100));
 
         return new ReserveInventoryResponse
