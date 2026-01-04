@@ -10,6 +10,7 @@
   <Folder Name="/scripts/">
     <File Path="scripts/cleanup.ps1" />
     <File Path="scripts/deploy.ps1" />
+    <File Path="scripts/fix-consul-certificate.ps1" />
   </Folder>
   <Project Path="InventoryService/InventoryService.csproj" />
   <Project Path="OrderService/OrderService.csproj" />
